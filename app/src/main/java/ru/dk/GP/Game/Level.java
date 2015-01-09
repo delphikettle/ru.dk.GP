@@ -11,11 +11,17 @@ public abstract class Level extends Thread
 	private int xMin, xMax, yMin, yMax;
 	private float G=1;
 	private float timeFactor=1;
+	private static long currentRealTime;
+	private double currentGameTime;
+	private boolean isMove=false, isEnd=false;
 	public Level(int w, int h) {
 		particles = new ArrayList<Component>();
 		xMin = yMin =0;
 		xMax = w;
 		yMax = h;
+		currentRealTime=System.currentTimeMillis();
+		currentGameTime=0;
+		this.setDaemon(true);
 	}
 
 	private void Interaction(Component c1, Component c2){
@@ -35,5 +41,20 @@ public abstract class Level extends Thread
 					this.Interaction(particles.get(i),particles.get(j));
 			particles.get(i).nextStep(time);
 		}
+	}
+
+	private float getNextStepTime(){
+		return (float)((currentGameTime=(this.timeFactor*(-currentRealTime+(currentRealTime=System.currentTimeMillis())))+currentGameTime)-currentGameTime);
+	}
+
+	@Override
+	public void run() {
+		super.run();
+		currentRealTime=System.currentTimeMillis();
+		currentGameTime=0;
+		while (!isEnd)
+			if(isMove) {
+				this.Move(this.getNextStepTime());
+			}
 	}
 }
