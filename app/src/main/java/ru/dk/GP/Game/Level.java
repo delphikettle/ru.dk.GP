@@ -6,13 +6,13 @@ import static ru.dk.GP.Game.Component.getDistance;
 
 public abstract class Level extends Thread implements Runnable
 {
-	ArrayList<Component> particles;
+	private ArrayList<Component> particles;
 	//borders:
 	private int xMin, xMax, yMin, yMax;
 	private float G=1;
 	private float timeFactor=1;
 	private static long currentRealTime;
-	private double currentGameTime;
+	private float currentGameTime;
 	private boolean isMove=false, isEnd=false;
 	public Level(int w, int h) {
 		particles = new ArrayList<Component>();
@@ -21,7 +21,10 @@ public abstract class Level extends Thread implements Runnable
 		yMax = h;
 		currentRealTime=System.currentTimeMillis();
 		currentGameTime=0;
-		this.setDaemon(true);
+		//this.setDaemon(true);
+	}
+	synchronized public Component[] getComponents(){
+		return (Component[]) particles.toArray();
 	}
 
 	synchronized private void Interaction(Component c1, Component c2){
@@ -57,4 +60,51 @@ public abstract class Level extends Thread implements Runnable
 				this.Move(this.getNextStepTime());
 			}
 	}
+	public float getG(){
+		return G;
+	}
+	public float setG(float newG){
+		return this.G=newG;
+	}
+	public float getTimeFactor(){
+		return this.timeFactor;
+	}
+	public float setTimeFactor(float newTimeFactor){
+		if(newTimeFactor>0) return this.timeFactor=newTimeFactor;
+			else return this.timeFactor;
+	}
+	public int getXMin(){
+		return this.xMin;
+	}
+	public int getYMin(){
+		return this.yMin;
+	}
+	public int getXMax(){
+		return this.xMax;
+	}
+	public int getYMax(){
+		return this.yMax;
+	}
+	public int setXMin(int newXMin){
+		return this.xMin=newXMin;
+	}
+	public int setYMin(int newYMin){
+		return this.yMin=newYMin;
+	}
+	public int setXMax(int newXMax){
+		return this.xMax=newXMax;
+	}
+	public int setYMax(int newYMax){
+		return this.yMax=newYMax;
+	}
+	public float getCurrentGameTime(){
+		return this.currentGameTime;
+	}
+	public void Pause(){
+
+	}
+	public void Resume(){
+
+	}
+
 }
