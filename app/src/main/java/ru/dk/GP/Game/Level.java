@@ -21,12 +21,17 @@ public abstract class Level extends Thread implements Runnable
 		yMax = h;
 		currentRealTime=System.currentTimeMillis();
 		currentGameTime=0;
+		setParticles();
 		//this.setDaemon(true);
 	}
-	synchronized public Component[] getComponents(){
-		return (Component[]) particles.toArray();
+	abstract public void setParticles();
+	synchronized final public ArrayList<Component> getComponents(){
+		return particles;
 	}
 
+	final public void addComponent(Component component){
+		particles.add(component);
+	}
 	synchronized private void Interaction(Component c1, Component c2){
 		float d=getDistance(c1,c2);
 		float F= (float) (c1.getF()*c2.getF()/Math.pow(d,2));

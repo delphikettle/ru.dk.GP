@@ -1,20 +1,32 @@
 package ru.dk.GP;
 
 import android.content.Context;
+import android.graphics.*;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import ru.dk.GP.Game.GameViewThread;
+import ru.dk.GP.Game.Level;
 
 /**
  * Created by Андрей on 11.01.2015.
  */
 public class LevelSurfaceViewer extends SurfaceView implements SurfaceHolder.Callback{
-    public LevelSurfaceViewer(Context context) {
+    private SurfaceViewThread drawThread;
+    private Level  level;
+    private int w,h;
+    public LevelSurfaceViewer(Context context, Level level,int w, int h) {
         super(context);
+        getHolder().addCallback(this);
+        this.w=w;
+        this.h=h;
+        this.level=level;
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-
+        drawThread= new SurfaceViewThread(holder,level,w,h);
+        drawThread.setDaemon(true);
+        drawThread.start();
     }
 
     @Override
@@ -24,9 +36,66 @@ public class LevelSurfaceViewer extends SurfaceView implements SurfaceHolder.Cal
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-
+        boolean retry = true;
+        drawThread.setRunning(false);
+        while (retry) {
+            try {
+                drawThread.join();
+                retry=false;
+            }catch (InterruptedException e){}
+        }
     }
 }
 class SurfaceViewThread extends  Thread{
+    private SurfaceHolder surfaceHolder;
+    private  Level level;
+    private GameViewThread gameViewThread;
+    private Canvas canvas;
+    private boolean isRunning=true;
+    private int w,h;
+    SurfaceViewThread(SurfaceHolder surfaceHolder, Level level, int w, int h){
+        this.surfaceHolder=surfaceHolder;
+        this.level=level;
+		if(!level.isAlive())
+        level.start();
+        this.w=w;
+        this.h=h;
+        setRunning(true);
+    }
 
+    public void setRunning(boolean newFlag){
+        isRunning=newFlag;
+        if(isRunning){
+            gameViewThread=new GameViewThread(level,w,h);
+			if(!gameViewThread.isAlive())
+            gameViewThread.start();
+        }else{
+            gameViewThread.stopThread();
+            gameViewThread=null;
+        }
+    }
+    @Override
+    public void run() {
+        Paint paint=new Paint();
+        while(isRunning){
+            canvas=null;
+            try{
+                canvas=surfaceHolder.lockCanvas();
+                synchronized (surfaceHolder){
+                    //Bitmap btm= BitmapFactory.decodeResource(MainActivity.thisis.getResources(),R.drawable.ic_launcher);
+                    Canvas cnv=new Canvas();
+                    Bitmap btm=Bitmap.createBitmap(w,h, Bitmap.Config.ALPHA_8);
+                    cnv.setBitmap(btm);
+                    cnv.drawColor(Color.YELLOW);
+                    //Bitmap btm=gameViewThread.getBitmap();
+                    //canvas.drawBitmap(btm,0,0,paint);
+					canvas.drawColor(Color.CYAN);
+                }
+            }finally {
+                if(canvas!=null){
+                    surfaceHolder.unlockCanvasAndPost(canvas);
+                }
+            }
+        }
+    }
 }

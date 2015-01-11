@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-public abstract class Component
+public class Component
 {
 	private volatile float vx,vy;
 	private volatile float x,y;
@@ -82,7 +82,10 @@ public abstract class Component
 		this.x=this.y=0;
 	}
 	public Bitmap getBitmap(Paint paint){
-		if(isRedrawNeeded)lastBitmap=drawBitmap(paint);
+		if(isRedrawNeeded){
+			lastBitmap=drawBitmap(paint);
+			isRedrawNeeded=false;
+		}
 		return lastBitmap;
 	}
 	private Bitmap drawBitmap(Paint paint){
