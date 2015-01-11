@@ -16,6 +16,7 @@ public class GameViewThread extends Thread{
     private Component component;
     private Paint paint;
     private Bitmap bitmapOfComponent;
+    private float scale,xShift,yShift;
     GameViewThread(Level level,int w, int h){
         this.level=level;
         this.setDaemon(true);
@@ -25,6 +26,9 @@ public class GameViewThread extends Thread{
         lastBitmap=bitmap.copy(Bitmap.Config.ALPHA_8,true);
         components=level.getComponents();
         paint=new Paint();
+        this.scale=1;
+        this.xShift=0;
+        this.yShift=0;
     }
 
     private void drawBackground(Canvas canvas){
