@@ -1,20 +1,29 @@
 package ru.dk.GP.Game;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+
 public abstract class Component
 {
 	private volatile float vx,vy;
 	private volatile float x,y;
-	private float m;
+	private float m,r,density;
 	private Particle owner;
 	private boolean isNeedRecount=true;
 	private float lastF;
-	public Component(float x, float y,float m){
+	private boolean isRedrawNeeded=true;
+	private Bitmap lastBitmap;
+	public Component(float x, float y,float m) throws IllegalArgumentException {
 		this.x=x;
 		this.y=y;
 		this.vx=0;
 		this.vy=0;
-		this.m=m;
+		if (m>0)this.m=m; else throw new IllegalArgumentException();
+		this.density=1;
+		this.r=(float)Math.sqrt(this.m/Math.PI/this.density);
 		owner=null;
+		lastBitmap=Bitmap.createBitmap((int)(2.1*r+1),(int)(2.1*r+1), Bitmap.Config.ALPHA_8);
 	}
 	public Component(Particle p){
 		x=0;
@@ -71,5 +80,16 @@ public abstract class Component
 	public void setOwner(Particle owner){
 		this.owner=owner;
 		this.x=this.y=0;
+	}
+	public Bitmap getBitmap(Paint paint){
+		if(isRedrawNeeded)lastBitmap=drawBitmap(paint);
+		return lastBitmap;
+	}
+	private Bitmap drawBitmap(Paint paint){
+		lastBitmap=Bitmap.createBitmap((int)(2.1*r+1),(int)(2.1*r+1), Bitmap.Config.ALPHA_8);
+		Canvas cnv=new Canvas();
+		cnv.setBitmap(lastBitmap);
+		cnv.drawCircle(cnv.getWidth()/2.0f,cnv.getHeight(),this.r,paint);
+		return lastBitmap;
 	}
 }

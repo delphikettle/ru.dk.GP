@@ -6,7 +6,7 @@ import static ru.dk.GP.Game.Component.getDistance;
 
 public abstract class Level extends Thread implements Runnable
 {
-	ArrayList<Component> particles;
+	private ArrayList<Component> particles;
 	//borders:
 	private int xMin, xMax, yMin, yMax;
 	private float G=1;
@@ -22,6 +22,9 @@ public abstract class Level extends Thread implements Runnable
 		currentRealTime=System.currentTimeMillis();
 		currentGameTime=0;
 		this.setDaemon(true);
+	}
+	synchronized public Component[] getComponents(){
+		return (Component[]) particles.toArray();
 	}
 
 	synchronized private void Interaction(Component c1, Component c2){
