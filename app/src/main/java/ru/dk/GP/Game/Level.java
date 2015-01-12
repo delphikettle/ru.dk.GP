@@ -1,5 +1,7 @@
 package ru.dk.GP.Game;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 import static ru.dk.GP.Game.Component.getDistance;
@@ -22,6 +24,7 @@ public abstract class Level extends Thread implements Runnable
 		currentRealTime=System.currentTimeMillis();
 		currentGameTime=0;
 		setParticles();
+		this.isMove=true;
 		//this.setDaemon(true);
 	}
 	abstract public void setParticles();
@@ -38,8 +41,8 @@ public abstract class Level extends Thread implements Runnable
 		float F1=F/c1.getM(),F2=F/c2.getM();
 		c1.informXAcceleration(F1*Component.getXDiff(c1,c2)/d);
 		c2.informXAcceleration(F2*Component.getXDiff(c2,c1)/d);
-		c1.informXAcceleration(F1*Component.getYDiff(c1, c2)/d);
-		c2.informXAcceleration(F2*Component.getYDiff(c2, c1)/d);
+		c1.informYAcceleration(F1 * Component.getYDiff(c1, c2) / d);
+		c2.informYAcceleration(F2 * Component.getYDiff(c2, c1) / d);
 	}
 	synchronized private void Move(float time){
 		for(int i=0;i<particles.size();i++) {
@@ -48,6 +51,9 @@ public abstract class Level extends Thread implements Runnable
 					this.Interaction(particles.get(i), particles.get(j));
 				particles.get(i).nextStep(time);
 			}catch (NullPointerException e){particles.remove(i);}
+			catch (IndexOutOfBoundsException e){
+				Log.e("Level.Move()",e.toString());
+			}
 		}
 	}
 

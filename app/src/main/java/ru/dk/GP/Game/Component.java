@@ -3,6 +3,7 @@ package ru.dk.GP.Game;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 
 public class Component
 {
@@ -37,6 +38,7 @@ public class Component
 		}else{
 			
 		}
+		Log.i("Component",""+this.getX()+" ; "+this.getY());
 	}
 	public float getF(){
 		if(isNeedRecount)return lastF=recountF();else

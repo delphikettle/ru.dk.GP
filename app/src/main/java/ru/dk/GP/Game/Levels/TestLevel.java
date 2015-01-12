@@ -14,5 +14,7 @@ public class TestLevel extends Level {
     @Override
     public void setParticles() {
         this.addComponent(new Component(100,100,1000));
+        this.addComponent(new Component(100,1000,1000));
+        this.addComponent(new Component(1000,100,1000));
     }
 }
