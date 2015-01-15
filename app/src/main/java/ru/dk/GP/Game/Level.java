@@ -23,42 +23,42 @@ public abstract class Level extends Thread implements Runnable
 		yMax = h;
 		currentRealTime=System.currentTimeMillis();
 		currentGameTime=0;
-		setParticles();
+		setParticles(w,h);
 		this.isMove=true;
-		//this.setDaemon(true);
+		this.setDaemon(true);
 	}
-	abstract public void setParticles();
+	abstract public void setParticles(int w, int h);
 	synchronized final public ArrayList<Component> getComponents(){
 		return particles;
 	}
 
-	final public void addComponent(Component component){
+	synchronized final public void addComponent(Component component){
 		particles.add(component);
 	}
 	synchronized private void Interaction(Component c1, Component c2){
 		float d=getDistance(c1,c2);
-		float F= (float) (c1.getF()*c2.getF()/Math.pow(d,2));
+		float F= (float) (c1.getF(c2)*c2.getF(c1)/Math.pow(d,2));
 		float F1=F/c1.getM(),F2=F/c2.getM();
 		c1.informXAcceleration(F1*Component.getXDiff(c1,c2)/d);
 		c2.informXAcceleration(F2*Component.getXDiff(c2,c1)/d);
 		c1.informYAcceleration(F1 * Component.getYDiff(c1, c2) / d);
 		c2.informYAcceleration(F2 * Component.getYDiff(c2, c1) / d);
+		//Log.i("Level.Interaction",F1+"");
 	}
 	synchronized private void Move(float time){
+		int j=0;
 		for(int i=0;i<particles.size();i++) {
 			try {
-				for (int j = i + 1; i < particles.size(); j++)
+				for (j = i + 1; j < particles.size(); j++)
 					this.Interaction(particles.get(i), particles.get(j));
-				particles.get(i).nextStep(time);
+				particles.get(i).nextStep(time*0.0001f);
 			}catch (NullPointerException e){particles.remove(i);}
-			catch (IndexOutOfBoundsException e){
-				Log.e("Level.Move()",e.toString());
-			}
 		}
 	}
 
 	synchronized private float getNextStepTime(){
-		return (float)((currentGameTime=(this.timeFactor*(-currentRealTime+(currentRealTime=System.currentTimeMillis())))+currentGameTime                              )-currentGameTime);
+		return -currentGameTime+ (currentGameTime=(this.timeFactor*1.0f*(-currentRealTime+(currentRealTime=System.currentTimeMillis()))+currentGameTime));
+		
 	}
 
 	@Override

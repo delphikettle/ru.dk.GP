@@ -1,21 +1,22 @@
 package ru.dk.GP;
 
-import android.content.Context;
+import android.content.*;
 import android.graphics.*;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import ru.dk.GP.Game.GameViewThread;
-import ru.dk.GP.Game.Level;
+import android.util.*;
+import android.view.*;
+import ru.dk.GP.Game.*;
 
 /**
  * Created by Андрей on 11.01.2015.
  */
 public class LevelSurfaceViewer extends SurfaceView implements SurfaceHolder.Callback{
-    private SurfaceViewThread drawThread;
+    private GameViewThread drawThread;
     private Level  level;
     private int w,h;
     public LevelSurfaceViewer(Context context, Level level,int w, int h) {
         super(context);
+		Log.i("Time","LevelSurfaceViewer "+
+			  System.currentTimeMillis());
         getHolder().addCallback(this);
         this.w=w;
         this.h=h;
@@ -24,7 +25,9 @@ public class LevelSurfaceViewer extends SurfaceView implements SurfaceHolder.Cal
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        drawThread= new SurfaceViewThread(holder,level,w,h);
+		Log.i("Time","surfaceCreated "+
+			  System.currentTimeMillis());
+        drawThread= new GameViewThread(holder,level,w,h);
         drawThread.setDaemon(true);
         drawThread.start();
     }
@@ -66,7 +69,7 @@ class SurfaceViewThread extends  Thread{
     public void setRunning(boolean newFlag){
         isRunning=newFlag;
         if(isRunning){
-            gameViewThread=new GameViewThread(level,w,h);
+            gameViewThread=new GameViewThread(surfaceHolder,level,w,h);
 			if(!gameViewThread.isAlive())
             gameViewThread.start();
         }else{

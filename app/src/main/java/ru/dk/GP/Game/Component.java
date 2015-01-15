@@ -4,11 +4,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
+import android.graphics.*;
+import ru.dk.GP.*;
 
 public class Component
 {
-	private volatile float vx,vy;
-	private volatile float x,y;
+	private float vx,vy;
+	private float x,y;
 	private float m,r,density;
 	private Particle owner;
 	private boolean isNeedRecount=true;
@@ -18,12 +20,12 @@ public class Component
 	public Component(float x, float y,float m) throws IllegalArgumentException {
 		this.x=x;
 		this.y=y;
-		this.vx=0;
-		this.vy=0;
+		this.vx=10;
+		this.vy=1;
 		if (m>0)this.m=m; else throw new IllegalArgumentException();
 		this.density=1;
 		this.r=(float)Math.sqrt(this.m/Math.PI/this.density);
-		owner=null;
+		this.owner=null;
 		lastBitmap=Bitmap.createBitmap((int)(2.1*r+1),(int)(2.1*r+1), Bitmap.Config.ALPHA_8);
 	}
 	public Component(Particle p){
@@ -38,13 +40,16 @@ public class Component
 		}else{
 			
 		}
-		Log.i("Component",""+this.getX()+" ; "+this.getY());
+		//x += vx *0.000005f;
+		//y += vy *0.000005f;
+		//if(time==0f) throw new IllegalArgumentException(""+time);
+		//Log.i("Component",""+this.getX()+" ; "+this.getY());
 	}
-	public float getF(){
-		if(isNeedRecount)return lastF=recountF();else
+	public float getF(Component cAnother){
+		if(isNeedRecount)return lastF=recountF(cAnother);else
 			return lastF;
 	}
-	private float recountF(){
+	private float recountF(Component cAnother){
 		isNeedRecount=false;
 		return m;
 	}
@@ -79,11 +84,14 @@ public class Component
 	public float getY(){
 		return this.y;
 	}
+	public float getR(){
+		return this.r;
+	}
 	public void setOwner(Particle owner){
 		this.owner=owner;
 		this.x=this.y=0;
 	}
-	public Bitmap getBitmap(Paint paint){
+	public final Bitmap getBitmap(Paint paint){
 		if(isRedrawNeeded){
 			lastBitmap=drawBitmap(paint);
 			isRedrawNeeded=false;
@@ -91,10 +99,15 @@ public class Component
 		return lastBitmap;
 	}
 	private Bitmap drawBitmap(Paint paint){
-		lastBitmap=Bitmap.createBitmap((int)(2.1*r+1),(int)(2.1*r+1), Bitmap.Config.ALPHA_8);
-		Canvas cnv=new Canvas();
-		cnv.setBitmap(lastBitmap);
-		cnv.drawCircle(cnv.getWidth()/2.0f,cnv.getHeight(),this.r,paint);
+		lastBitmap=Bitmap.createBitmap((int)(2.1*r+1),(int)(2.1*r+1), Bitmap.Config.ARGB_8888);
+		Canvas cnv=new Canvas(lastBitmap);
+		//cnv.setBitmap(lastBitmap);
+		paint.setColor(Color.argb(255,255,0,0));
+		//paint.setShadowLayer(this.r*1.5f,0,0,Color.argb(255,0,255,255));
+		cnv.drawCircle(cnv.getWidth()/2.0f,cnv.getHeight()/2.0f,this.r,paint);
+		//paint.setColor(Color.BLACK);
+		//cnv.drawText(""+this.r,0,0,paint);
+		//lastBitmap=BitmapFactory.decodeResource(MainActivity.thisis.getResources(),R.drawable.ic_launcher);
 		return lastBitmap;
 	}
 }
