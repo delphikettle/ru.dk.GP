@@ -3,6 +3,8 @@ package ru.dk.GP;
 import android.app.*;
 import android.os.*;
 import android.util.*;
+import android.view.Display;
+import android.view.WindowManager;
 import ru.dk.GP.Game.Levels.*;
 import android.widget.*;
 
@@ -17,7 +19,10 @@ public class MainActivity extends Activity
         thisis=this;
 		Log.i("Time","Main0 "+
 		System.currentTimeMillis());
-        setContentView( new LevelSurfaceViewer(this,new TestLevel(1024,1024),1024,1024));
+		Display display=((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+
+		int w=display.getWidth(),h=display.getHeight();
+        setContentView( new LevelSurfaceViewer(this,new TestLevel(w,h),w,h));
 		Log.i("Time","Main1 "+
 			  System.currentTimeMillis());
 		//throw new RuntimeException();

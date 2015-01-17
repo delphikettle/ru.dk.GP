@@ -17,9 +17,12 @@ import android.view.*;
 public class GameViewThread extends Thread{
     private Bitmap bitmap;
     private Bitmap lastBitmap;
+	private Bitmap bitmapBackground;
+	private boolean isNeedRedrawBackground=true;
+	private boolean isCouldGetBitmap=true;
     private Canvas canvas;
     private Level level;
-    private ArrayList<Component> components;
+    private Object[] components;
     private Component component;
     private Paint paint;
     private Bitmap bitmapOfComponent;
@@ -36,16 +39,18 @@ public class GameViewThread extends Thread{
         this.setDaemon(true);
 		Log.i("Time","GameViewThread2 "+
 			  System.currentTimeMillis());
-        bitmap=Bitmap.createBitmap(w,h, Bitmap.Config.ARGB_8888);
+        bitmap=Bitmap.createBitmap(w,h, Bitmap.Config.ARGB_4444);
+		bitmapBackground=Bitmap.createBitmap(w,h, Bitmap.Config.ARGB_4444);
 		Log.i("Time","GameViewThread3 "+
 			  System.currentTimeMillis());
         canvas= new Canvas(bitmap);
 		Log.i("Time","GameViewThread4 "+
 			  System.currentTimeMillis());
-        lastBitmap=bitmap.copy(Bitmap.Config.ARGB_8888,true);
+        lastBitmap=//bitmap.copy(Bitmap.Config.ARGB_4444,true);
+				Bitmap.createBitmap(bitmap);
 		Log.i("Time","GameViewThread5 "+
 			  System.currentTimeMillis());
-        components=level.getComponents();
+        components=level.getComponents().toArray();
 		Log.i("Time","GameViewThread6 "+
 			  System.currentTimeMillis());
 		this.surfaceHolder=holder;
@@ -76,12 +81,9 @@ public class GameViewThread extends Thread{
         //reDraw(canvas);
 		Log.i("Time","GameViewThread15 "+
 			  System.currentTimeMillis());
+		canvas=new Canvas(bitmap);
     }
 
-    public void drawBackground(Canvas canvas){
-		paint.setShadowLayer(0,0,0,0);
-        canvas.drawColor(Color.CYAN);
-    }
 	public void setRunning(boolean newFlag){
 		this.isRunning=newFlag;
 		if(isRunning){
@@ -94,22 +96,11 @@ public class GameViewThread extends Thread{
 					synchronized public void run()
 					{
 						// TODO: Implement this method
-						if(isRunning){
+						/*if(isRunning){
 							canvasForSurface=null;
 							try{
 								canvasForSurface=surfaceHolder.lockCanvas();
 								synchronized(surfaceHolder){
-									//canvasForSurface.drawBitmap(bitmap,0,0,paint);
-									//canvasForSurface.drawColor(Color.BLUE);
-									//components=level.getComponents();
-									//canvasForSurface.drawBitmap(components.get(0).getBitmap(paint),0,0,paint);
-									//paint.setColor(Color.BLUE);
-									//canvasForSurface.drawCircle(components.get(0).getX(),components.get(0).getY(),components.get(0).getR(),paint);
-									//canvasForSurface.drawBitmap(bitmap,0,0,paint);
-									//reDraw(canvasForSurface);
-									//Bitmap btm=Bitmap.createBitmap(1024,1024, Bitmap.Config.ARGB_4444);
-									//Canvas cnv=new Canvas(btm);
-									//cnv.drawColor(Color.GREEN);
 									canvasForSurface.drawBitmap(lastBitmap,0,0,paint);
 								}
 							}catch(NullPointerException e){Log.e("timer.run()",e.toString());}
@@ -118,44 +109,78 @@ public class GameViewThread extends Thread{
 									surfaceHolder.unlockCanvasAndPost(canvasForSurface);
 								}
 							}
-						}
+						}*/
+						reDraw(canvas);
 						
 					}
 
 				
-			},TimeUnit.MILLISECONDS.toMillis(34),TimeUnit.MILLISECONDS.toMillis(100));
+			},TimeUnit.MILLISECONDS.toMillis(34),TimeUnit.MILLISECONDS.toMillis(50));
 		}else{
-			
+			Log.i("time","maxReDraw: "+maxReDraw+"maxUpdate: "+maxUpdate);
 			timer.cancel();
 			timer=null;
 		}
 	}
-    @Override
+	private long maxReDraw=0,maxUpdate=0;
+	@Override
     public void run() {
-		
+		long time=System.currentTimeMillis();
         super.run();
+		Canvas canvasForSurface;
         while(!isEnd)
-			if(isRunning){
-            	reDraw(canvas);
-        	}
+				if(isRunning){
+					canvasForSurface=null;
+					try{
+						canvasForSurface=surfaceHolder.lockCanvas();
+						synchronized(surfaceHolder){
+							canvasForSurface.drawBitmap(bitmap,0,0,paint);
+						}
+					}catch(NullPointerException e){Log.e("timer.run()",e.toString());}
+					finally{
+						if(canvasForSurface!=null){
+							surfaceHolder.unlockCanvasAndPost(canvasForSurface);
+						}
+					}
+				}
+		if(System.currentTimeMillis()-time>maxUpdate)maxUpdate=System.currentTimeMillis()-time;
     }
-    private void reDraw(Canvas cnv){
-		canvas=new Canvas(bitmap);
+
+	public void drawBackground(Canvas canvas){
+		if(isNeedRedrawBackground){
+			reDrawBackground(new Canvas(bitmapBackground));
+			isNeedRedrawBackground=false;
+		}
+		canvas.drawBitmap(bitmapBackground, 0, 0, paint);
+	}
+	private void reDrawBackground(Canvas canvas){
 		paint.setShadowLayer(0,0,0,0);
+
+		canvas.drawColor(Color.CYAN);
+	}
+    private void reDraw(Canvas cnv){
+
+		//canvas=new Canvas(bitmap);
+		paint.setShadowLayer(0,0,0,0);
+		components=level.getComponents().toArray();
+		isCouldGetBitmap=false;
         drawBackground(cnv);
-        components=level.getComponents();
-        for(int i=0;i<components.size();i++) {
-            component=components.get(i);
+        for(int i=0;i<components.length;i++) {
+            component= (Component) components[i];
             if(component==null)continue;
             bitmapOfComponent=component.getBitmap(paint);
             int size=bitmapOfComponent.getWidth();
             cnv.drawBitmap(bitmapOfComponent,component.getX()-size/2,component.getY()-size/2,paint);
 			//cnv.drawColor(Color.GRAY);
         }
+		isCouldGetBitmap=true;
         //Canvas cnv=new Canvas();
         //Canvas cnv1= new Canvas(lastBitmap);
        	//cnv1.drawColor(Color.RED);
-        lastBitmap=bitmap.copy(Bitmap.Config.ARGB_8888,false);
+		long time=System.currentTimeMillis();
+        //lastBitmap=//bitmap.copy(Bitmap.Config.ARGB_4444,false);
+		//Bitmap.createBitmap(bitmap);
+		if(System.currentTimeMillis()-time>maxReDraw)maxReDraw=System.currentTimeMillis()-time;
         //if (lastBitmap==null)throw new RuntimeException();
     }
 

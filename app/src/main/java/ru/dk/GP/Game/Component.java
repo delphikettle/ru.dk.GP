@@ -99,7 +99,7 @@ public class Component
 		return lastBitmap;
 	}
 	private Bitmap drawBitmap(Paint paint){
-		lastBitmap=Bitmap.createBitmap((int)(2.1*r+1),(int)(2.1*r+1), Bitmap.Config.ARGB_8888);
+		lastBitmap=Bitmap.createBitmap((int)(2.1*r+1),(int)(2.1*r+1), Bitmap.Config.ARGB_4444);
 		Canvas cnv=new Canvas(lastBitmap);
 		//cnv.setBitmap(lastBitmap);
 		paint.setColor(Color.argb(255,255,0,0));
