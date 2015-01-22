@@ -16,8 +16,11 @@ public abstract class Level extends Thread implements Runnable
 	private static long currentRealTime;
 	private float currentGameTime;
 	private boolean isMove=false, isEnd=false;
+	private volatile boolean isComponentsChanged=true;
+	private Object[] componentArray=null;
 	public Level(int w, int h) {
 		particles = new ArrayList<Component>();
+		componentArray=particles.toArray();
 		xMin = yMin =0;
 		xMax = w;
 		yMax = h;
@@ -26,16 +29,26 @@ public abstract class Level extends Thread implements Runnable
 		setParticles(w,h);
 		this.isMove=true;
 		this.setDaemon(true);
+		Log.i("Time","LevelCreated"+System.currentTimeMillis());
 	}
 	abstract public void setParticles(int w, int h);
 	synchronized final public ArrayList<Component> getComponents(){
 		return particles;
 	}
+	synchronized final public Object[] getComponentArray(){
+		if(isComponentsChanged){
+			componentArray=particles.toArray();
+			isComponentsChanged=false;
+		}
+		return componentArray;
+	}
 
 	synchronized final public void addComponent(Component component){
 		particles.add(component);
+		isComponentsChanged=true;
+		Log.i("Time","ComponentAdded "+System.currentTimeMillis());
 	}
-	synchronized private void Interaction(Component c1, Component c2){
+	synchronized final private void Interaction(Component c1, Component c2){
 		float d=getDistance(c1,c2);
 		float F= (float) (c1.getF(c2)*c2.getF(c1)/Math.pow(d,2));
 		float F1=F/c1.getM(),F2=F/c2.getM();
@@ -56,13 +69,13 @@ public abstract class Level extends Thread implements Runnable
 		}
 	}
 
-	synchronized private float getNextStepTime(){
+	synchronized final private float getNextStepTime(){
 		return -currentGameTime+ (currentGameTime=(this.timeFactor*1.0f*(-currentRealTime+(currentRealTime=System.currentTimeMillis()))+currentGameTime));
 		
 	}
 
 	@Override
-	public void run() {
+	final public void run() {
 		super.run();
 		currentRealTime=System.currentTimeMillis();
 		currentGameTime=0;
@@ -71,44 +84,44 @@ public abstract class Level extends Thread implements Runnable
 				this.Move(this.getNextStepTime());
 			}
 	}
-	public float getG(){
+	final public float getG(){
 		return G;
 	}
-	public float setG(float newG){
+	final public float setG(float newG){
 		return this.G=newG;
 	}
-	public float getTimeFactor(){
+	final public float getTimeFactor(){
 		return this.timeFactor;
 	}
-	public float setTimeFactor(float newTimeFactor){
+	final public float setTimeFactor(float newTimeFactor){
 		if(newTimeFactor>0) return this.timeFactor=newTimeFactor;
 			else return this.timeFactor;
 	}
-	public int getXMin(){
+	final public int getXMin(){
 		return this.xMin;
 	}
-	public int getYMin(){
+	final public int getYMin(){
 		return this.yMin;
 	}
-	public int getXMax(){
+	final public int getXMax(){
 		return this.xMax;
 	}
-	public int getYMax(){
+	final public int getYMax(){
 		return this.yMax;
 	}
-	public int setXMin(int newXMin){
+	final public int setXMin(int newXMin){
 		return this.xMin=newXMin;
 	}
-	public int setYMin(int newYMin){
+	final public int setYMin(int newYMin){
 		return this.yMin=newYMin;
 	}
-	public int setXMax(int newXMax){
+	final public int setXMax(int newXMax){
 		return this.xMax=newXMax;
 	}
-	public int setYMax(int newYMax){
+	final public int setYMax(int newYMax){
 		return this.yMax=newYMax;
 	}
-	public float getCurrentGameTime(){
+	final public float getCurrentGameTime(){
 		return this.currentGameTime;
 	}
 	public void Pause(){

@@ -82,6 +82,8 @@ public class GameViewThread extends Thread{
 		Log.i("Time","GameViewThread15 "+
 			  System.currentTimeMillis());
 		canvas=new Canvas(bitmap);
+		Log.i("Time","GameViewThread16 "+
+			  System.currentTimeMillis());
     }
 
 	public void setRunning(boolean newFlag){
@@ -95,22 +97,7 @@ public class GameViewThread extends Thread{
 					@Override
 					synchronized public void run()
 					{
-						// TODO: Implement this method
-						/*if(isRunning){
-							canvasForSurface=null;
-							try{
-								canvasForSurface=surfaceHolder.lockCanvas();
-								synchronized(surfaceHolder){
-									canvasForSurface.drawBitmap(lastBitmap,0,0,paint);
-								}
-							}catch(NullPointerException e){Log.e("timer.run()",e.toString());}
-							finally{
-								if(canvasForSurface!=null){
-									surfaceHolder.unlockCanvasAndPost(canvasForSurface);
-								}
-							}
-						}*/
-						reDraw(canvas);
+						//reDraw(canvas);
 						
 					}
 
@@ -125,16 +112,17 @@ public class GameViewThread extends Thread{
 	private long maxReDraw=0,maxUpdate=0;
 	@Override
     public void run() {
-		long time=System.currentTimeMillis();
         super.run();
 		Canvas canvasForSurface;
         while(!isEnd)
-				if(isRunning){
+			if(isRunning){
+				long time=System.currentTimeMillis();
 					canvasForSurface=null;
 					try{
 						canvasForSurface=surfaceHolder.lockCanvas();
 						synchronized(surfaceHolder){
-							canvasForSurface.drawBitmap(bitmap,0,0,paint);
+							reDraw(canvasForSurface);
+							//canvasForSurface.drawBitmap(bitmap,0,0,paint);
 						}
 					}catch(NullPointerException e){Log.e("timer.run()",e.toString());}
 					finally{
@@ -142,8 +130,12 @@ public class GameViewThread extends Thread{
 							surfaceHolder.unlockCanvasAndPost(canvasForSurface);
 						}
 					}
+					if(System.currentTimeMillis()-time>maxUpdate){
+						
+						maxUpdate=System.currentTimeMillis()-time;
+						Log.i("Time","maxUpdate"+maxUpdate);
+						}
 				}
-		if(System.currentTimeMillis()-time>maxUpdate)maxUpdate=System.currentTimeMillis()-time;
     }
 
 	public void drawBackground(Canvas canvas){
@@ -156,13 +148,18 @@ public class GameViewThread extends Thread{
 	private void reDrawBackground(Canvas canvas){
 		paint.setShadowLayer(0,0,0,0);
 
-		canvas.drawColor(Color.CYAN);
+		canvas.drawColor(Color.GREEN);
 	}
+	private boolean isFirst=true;
     private void reDraw(Canvas cnv){
 
 		//canvas=new Canvas(bitmap);
 		paint.setShadowLayer(0,0,0,0);
-		components=level.getComponents().toArray();
+		//long time=System.currentTimeMillis();
+		components=level.getComponentArray();
+			//level.getComponents().toArray();
+		if(isFirst){isFirst=false;Log.i("Time","First"+System.currentTimeMillis());}
+		//if(System.currentTimeMillis()-time>maxReDraw)maxReDraw=System.currentTimeMillis()-time;
 		isCouldGetBitmap=false;
         drawBackground(cnv);
         for(int i=0;i<components.length;i++) {
@@ -177,10 +174,8 @@ public class GameViewThread extends Thread{
         //Canvas cnv=new Canvas();
         //Canvas cnv1= new Canvas(lastBitmap);
        	//cnv1.drawColor(Color.RED);
-		long time=System.currentTimeMillis();
         //lastBitmap=//bitmap.copy(Bitmap.Config.ARGB_4444,false);
 		//Bitmap.createBitmap(bitmap);
-		if(System.currentTimeMillis()-time>maxReDraw)maxReDraw=System.currentTimeMillis()-time;
         //if (lastBitmap==null)throw new RuntimeException();
     }
 

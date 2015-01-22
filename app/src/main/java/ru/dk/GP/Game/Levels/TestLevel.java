@@ -16,7 +16,7 @@ public class TestLevel extends Level {
     @Override
     public void setParticles(int w, int h) {
 		Random rnd=new Random();
-		for(int i=0;i<100;i++)
+		for(int i=0;i<10;i++)
         	this.addComponent(new Component(rnd.nextInt(w),rnd.nextInt(h),rnd.nextInt(2500)+100));
     }
 }
