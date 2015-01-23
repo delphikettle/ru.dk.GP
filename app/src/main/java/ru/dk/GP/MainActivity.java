@@ -1,12 +1,12 @@
 package ru.dk.GP;
 
-import android.app.*;
-import android.os.*;
-import android.util.*;
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-import ru.dk.GP.Game.Levels.*;
-import android.widget.*;
+import android.widget.Toast;
+import ru.dk.GP.Game.Levels.TestLevel;
 
 public class MainActivity extends Activity 
 {
@@ -26,7 +26,7 @@ public class MainActivity extends Activity
 		Log.i("Time","Main1 "+
 			  System.currentTimeMillis());
 		//throw new RuntimeException();
-    }
+	}
 
 
 
